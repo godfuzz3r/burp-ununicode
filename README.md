@@ -1,7 +1,7 @@
 ## UnUnicode
 
 
-A burpsuite extention mostly based on this repository: asd https://github.com/bit4woo/u2c
+A burpsuite extention mostly based on this repository: https://github.com/bit4woo/u2c
 
 ## Why
 
