@@ -5,7 +5,7 @@ A burpsuite extention mostly based on this repository: https://github.com/bit4wo
 
 ## Why
 
-Plugin from repository above didn't work in my burp suite, so I decided to make a simple replacement that uses StringEscapeUtils.unescapeJava to convert unicode escape sequences to single-byte characters.
+Plugin from repository above didn't work in my burp suite, so I decided to make a simple replacement that uses `StringEscapeUtils.unescapeJava` to convert unicode escape sequences to single-byte characters.
 
 ## Example
 
