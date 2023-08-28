@@ -16,15 +16,15 @@ public class BurpExtender implements IBurpExtender,IMessageEditorTabFactory
 	public String github = "https://github.com/godfuzz3r/burp-ununicode";
 
 	@Override
-   public void registerExtenderCallbacks(IBurpExtenderCallbacks callbacks)
-   {
-		BurpExtender.callbacks = callbacks;
-		callbacks.printOutput(getFullExtensionName());
-		callbacks.printOutput(github);
-		helpers = callbacks.getHelpers();
-		callbacks.setExtensionName(getFullExtensionName());
-		callbacks.registerMessageEditorTabFactory(this);
-   }
+	public void registerExtenderCallbacks(IBurpExtenderCallbacks callbacks)
+	{
+			BurpExtender.callbacks = callbacks;
+			callbacks.printOutput(getFullExtensionName());
+			callbacks.printOutput(github);
+			helpers = callbacks.getHelpers();
+			callbacks.setExtensionName(getFullExtensionName());
+			callbacks.registerMessageEditorTabFactory(this);
+	}
 	
 	@Override
 	public IMessageEditorTab createNewInstance(IMessageEditorController controller, boolean editable) {
