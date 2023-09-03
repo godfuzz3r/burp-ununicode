@@ -19,10 +19,10 @@ public class BurpExtender implements IBurpExtender,IMessageEditorTabFactory
 	public void registerExtenderCallbacks(IBurpExtenderCallbacks callbacks)
 	{
 			BurpExtender.callbacks = callbacks;
-			callbacks.printOutput(getFullExtensionName());
+			callbacks.printOutput(ExtensionName);
 			callbacks.printOutput(github);
 			helpers = callbacks.getHelpers();
-			callbacks.setExtensionName(getFullExtensionName());
+			callbacks.setExtensionName(ExtensionName);
 			callbacks.registerMessageEditorTabFactory(this);
 	}
 	
@@ -31,29 +31,12 @@ public class BurpExtender implements IBurpExtender,IMessageEditorTabFactory
 		return new UnUnicode(controller, false, helpers, callbacks);
 	}
 
-	private static void flushStd(){
-		try{
-			stdout = new PrintWriter(callbacks.getStdout(), true);
-			stderr = new PrintWriter(callbacks.getStderr(), true);
-		}catch (Exception e){
-			stdout = new PrintWriter(System.out, true);
-			stderr = new PrintWriter(System.out, true);
-		}
-	}
-
 	public static PrintWriter getStdout() {
-		flushStd();
 		return stdout;
 	}
 
 	public static PrintWriter getStderr() {
-		flushStd();
 		return stderr;
-	}
-
-	//name+version+author
-	public static String getFullExtensionName(){
-		return ExtensionName;
 	}
 
 	public static IBurpExtenderCallbacks getCallbacks() {
