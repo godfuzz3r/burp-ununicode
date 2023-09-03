@@ -30,20 +30,6 @@ public class UnUnicode implements IMessageEditorTab{
 
 	private static IExtensionHelpers helpers;
 
-	public byte[] getHeaders(byte[] data){
-		IRequestInfo analyze = helpers.analyzeRequest(data);
-		int bodyOffset = analyze.getBodyOffset();
-		byte[] headers = Arrays.copyOfRange(data, 0, bodyOffset);
-		return headers;
-	}
-
-	public byte[] getBody(byte[] data){
-		IRequestInfo analyze = helpers.analyzeRequest(data);
-		int bodyOffset = analyze.getBodyOffset();
-		byte[] body = Arrays.copyOfRange(data, bodyOffset, data.length);
-		return body;
-	}
-
 	public byte[] concatHttp(byte[] headers, byte[] content) throws IOException {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		outputStream.write(headers);
@@ -104,8 +90,12 @@ public class UnUnicode implements IMessageEditorTab{
 	@Override
 	public void setMessage(byte[] content, boolean isRequest)
 	{
-		byte[] headers = getHeaders(content);
-		byte[] body = getBody(content);
+		// split http headers and body
+		IRequestInfo analyze = helpers.analyzeRequest(content);
+		int bodyOffset = analyze.getBodyOffset();
+
+		byte[] headers = Arrays.copyOfRange(content, 0, bodyOffset);
+		byte[] body = Arrays.copyOfRange(content, bodyOffset, content.length);
 
 		String unescaped = StringEscapeUtils.unescapeJava(new String(body));
 		if (isJson(unescaped)){
