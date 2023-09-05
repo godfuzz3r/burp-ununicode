@@ -4,12 +4,12 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Arrays;
 
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-
-import org.apache.commons.text.StringEscapeUtils;
 
 import burp.IBurpExtenderCallbacks;
 import burp.IExtensionHelpers;
@@ -18,16 +18,16 @@ import burp.IMessageEditorTab;
 import burp.IRequestInfo;
 import burp.ITextEditor;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
+import org.apache.commons.text.translate.UnicodeUnescaper;
 
 public class UnUnicode implements IMessageEditorTab{
 	private ITextEditor txtInput;
 	private JPanel panel = new JPanel(new BorderLayout(0, 0));
 
+	private static IBurpExtenderCallbacks callbacks;
 	private static IExtensionHelpers helpers;
 
 	public byte[] concatHttp(byte[] headers, byte[] content) throws IOException {
@@ -37,25 +37,14 @@ public class UnUnicode implements IMessageEditorTab{
 		return outputStream.toByteArray();
 	}
 
-
-	public static boolean isJson(String content) {
-		Gson gson = new Gson();
-		try {
-			gson.fromJson(content, Object.class);
-			Object jsonObjType = gson.fromJson(content, Object.class).getClass();
-			if(jsonObjType.equals(String.class)){
-				return false;
-			}
-			return true;
-		} catch (com.google.gson.JsonSyntaxException ex) {
-			return false;
-		}
-	}
-
 	public String prettifyJson(String json) {
-		Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().serializeNulls().create();
-		JsonElement je = JsonParser.parseString(json);
-		return gson.toJson(je);
+		ObjectMapper mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
+		try{
+			Object jsonObject = mapper.readValue(json, Object.class);
+			return mapper.writer(new BurpPrettyPrinter()).writeValueAsString(jsonObject);
+ 		}catch (Exception e) {
+			return json;
+		}
 	}
 
 	public UnUnicode(IMessageEditorController controller, boolean editable, IExtensionHelpers helpers, IBurpExtenderCallbacks callbacks)
@@ -67,6 +56,7 @@ public class UnUnicode implements IMessageEditorTab{
 		panel.add(txtInput.getComponent(), BorderLayout.CENTER);
 		callbacks.customizeUiComponent(panel);
 		UnUnicode.helpers = helpers;
+		UnUnicode.callbacks = callbacks;
 	}
 
 	@Override
@@ -97,15 +87,19 @@ public class UnUnicode implements IMessageEditorTab{
 		byte[] headers = Arrays.copyOfRange(content, 0, bodyOffset);
 		byte[] body = Arrays.copyOfRange(content, bodyOffset, content.length);
 
-		String unescaped = StringEscapeUtils.unescapeJava(new String(body));
-		if (isJson(unescaped)){
-			unescaped = prettifyJson(unescaped);
-		}
+		// if not json, just returns old string
+		String prettified = prettifyJson(new String(body));
+
+		// do all the magic
+		String unescaped = new UnicodeUnescaper().translate(prettified);
+
 		try{
 			byte[] out = concatHttp(headers, unescaped.getBytes());
 			txtInput.setText(out);
 		} catch (Exception e) {
-			e.printStackTrace();
+			StringWriter errorWriter = new StringWriter();
+			e.printStackTrace(new PrintWriter(errorWriter));
+			callbacks.printError(errorWriter.toString());
 		}
 	}
 
