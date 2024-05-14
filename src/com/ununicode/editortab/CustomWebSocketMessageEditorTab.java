@@ -1,0 +1,86 @@
+package com.ununicode.editortab;
+
+import burp.api.montoya.MontoyaApi;
+import burp.api.montoya.core.ByteArray;
+import burp.api.montoya.logging.Logging;
+import burp.api.montoya.ui.Selection;
+import burp.api.montoya.ui.contextmenu.WebSocketMessage;
+import burp.api.montoya.ui.editor.EditorOptions;
+import burp.api.montoya.ui.editor.RawEditor;
+import burp.api.montoya.ui.editor.extension.EditorCreationContext;
+import burp.api.montoya.ui.editor.extension.EditorMode;
+import burp.api.montoya.ui.editor.extension.ExtensionProvidedWebSocketMessageEditor;
+
+import java.awt.*;
+
+import com.ununicode.tools.Ununicode;
+
+public class CustomWebSocketMessageEditorTab implements ExtensionProvidedWebSocketMessageEditor {
+
+    MontoyaApi api;
+    Logging logging;
+    EditorCreationContext creationContext;
+    RawEditor requestEditorTab;
+    WebSocketMessage message;
+
+    public CustomWebSocketMessageEditorTab (MontoyaApi api, EditorCreationContext creationContext) {
+        this.api = api;
+        this.creationContext = creationContext;
+
+        this.logging = api.logging();
+
+        if (creationContext.editorMode() == EditorMode.READ_ONLY) {
+            requestEditorTab = api.userInterface().createRawEditor(EditorOptions.READ_ONLY);
+        } else {
+            requestEditorTab = api.userInterface().createRawEditor();
+        }
+    }
+
+    @Override
+    public ByteArray getMessage() {
+        return message.payload();
+    }
+
+    @Override
+    public void setMessage(WebSocketMessage message) {
+        this.message = message;
+        byte[] content = message.payload().getBytes();
+        try {
+            byte[] unsecaped = Ununicode.getUnescapedRawContent(content);
+            this.requestEditorTab.setContents(ByteArray.byteArray(unsecaped));
+
+        } catch (Exception e) {
+            this.logging.logToError(e);
+            this.requestEditorTab.setContents(message.payload());
+        }
+    }
+
+    @Override
+    public boolean isEnabledFor(WebSocketMessage message) {
+        return true;
+    }
+
+    @Override
+    public String caption() {
+        return "UnUnicode";
+    }
+
+    @Override
+    public Component uiComponent() {
+        return requestEditorTab.uiComponent();
+    }
+
+    @Override
+    public Selection selectedData() {
+        if(requestEditorTab.selection().isPresent()) {
+            return requestEditorTab.selection().get();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public boolean isModified() {
+        return requestEditorTab.isModified();
+    }
+}

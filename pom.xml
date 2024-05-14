@@ -2,15 +2,15 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.godfuzz3r.burp</groupId>
+	<groupId>com.ununicode.burp</groupId>
 	<artifactId>ununicode</artifactId>
-	<version>1.1</version>
+	<version>1.2</version>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.7.0</version>
+				<version>3.13.0</version>
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
@@ -20,7 +20,7 @@
 			
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>3.1.0</version>
+				<version>3.7.1</version>
 				<configuration>
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
@@ -46,25 +46,24 @@
 		</plugins>
 	</build>
 	<dependencies>
-		<!-- https://mvnrepository.com/artifact/net.portswigger.burp.extender/burp-extender-api -->
 		<dependency>
-			<groupId>net.portswigger.burp.extender</groupId>
-			<artifactId>burp-extender-api</artifactId>
-			<version>[2.3,)</version>
+			<groupId>net.portswigger.burp.extensions</groupId>
+			<artifactId>montoya-api</artifactId>
+			<version>2023.12.1</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-text</artifactId>
-			<version>[1.10.0,)</version>
+			<version>1.12.0</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.15.2</version>
+			<version>2.17.1</version>
 		</dependency>
 	</dependencies>
 </project>
