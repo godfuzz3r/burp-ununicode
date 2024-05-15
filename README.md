@@ -1,22 +1,18 @@
 ## UnUnicode
 
+Burp extention for unescaping unicode-escaped sequences. Idea taken from [u2c](https://github.com/bit4woo/u2c), but this plugin won't work in my burp.
 
-A burpsuite extention mostly based on this repository: https://github.com/bit4woo/u2c
-
-## Why
-
-Plugin from repository above didn't work in my burp suite, so I decided to make a simple replacement that uses `org.apache.commons.text.translate.UnicodeUnescaper` to convert unicode escape sequences to single-byte characters.
+Wroten with burp suite montoya api and supports websockets.
 
 ## Example
 
-Below is an example of how a json with a unicode escape sequence can be viewed in a burp without converting it in python cli or smth.
-You may notice that the double-byte unicode character (emoji at the end of the json) was not converted correctly, but this is enough for my routine tasks.
+You may notice that double-byte characters such as emojis are not converted correctly, but this is enough for my routine tasks.
 
 ![default pretty print](img/1.png)
 
 ![decode unicode escape sequences](img/2.png)
 
-This is works on any content type as well, but pretty print implemented to json only:
+It works with any content type, but pretty print implemented to json only:
 
 ![simple text](img/3.png)
 
@@ -24,8 +20,6 @@ This is works on any content type as well, but pretty print implemented to json 
 
 ```bash
 mvn clean install
-# install target/ununicode-1.0-jar-with-dependencies.jar
+# install target/ununicode-1.2-jar-with-dependencies.jar
 # in your burp extentions
 ```
-
-Much thanks to [bit4woo](https://github.com/bit4woo) and [u2u](https://github.com/bit4woo/u2c) project for code base.
