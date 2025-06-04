@@ -29,11 +29,7 @@ public class CustomHttpRequestEditorTab implements ExtensionProvidedHttpRequestE
 
         this.logging = api.logging();
 
-        if (creationContext.editorMode() == EditorMode.READ_ONLY) {
-            requestEditorTab = api.userInterface().createRawEditor(EditorOptions.READ_ONLY);
-        } else {
-            requestEditorTab = api.userInterface().createRawEditor();
-        }
+        requestEditorTab = api.userInterface().createRawEditor(EditorOptions.READ_ONLY);
     }
 
     @Override
