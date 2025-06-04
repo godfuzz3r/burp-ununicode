@@ -20,6 +20,6 @@ It works with any content type, but pretty print implemented to json only:
 
 ```bash
 mvn clean install
-# install target/ununicode-1.2-jar-with-dependencies.jar
+# install target/ununicode-1.3-jar-with-dependencies.jar
 # in your burp extentions
 ```
