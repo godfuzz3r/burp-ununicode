@@ -4,17 +4,43 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
-import org.apache.commons.text.translate.UnicodeUnescaper;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 public class Ununicode {
-	private static byte[] concatHttp(byte[] headers, byte[] content) throws IOException {
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		outputStream.write(headers);
-		outputStream.write(content);
-		return outputStream.toByteArray();
+	// it's ugly, but here we can decode all decodable 1-byte unicode escaped sequences
+	// and skip unescaped and non-decodable \ uXXXX values
+	private static String unescape(String input) {
+		StringBuilder result = new StringBuilder(input.length());
+		int length = input.length();
+		int i = 0;
+
+		while (i < length) {
+			if (i + 6 <= length && input.charAt(i) == '\\' && input.charAt(i + 1) == 'u') {
+				int code = 0;
+				boolean valid = true;
+
+				for (int j = 0; j < 4; j++) {
+					char c = input.charAt(i + 2 + j);
+					int digit = Character.digit(c, 16);
+					if (digit == -1) {
+						valid = false;
+						break;
+					}
+					code = (code << 4) | digit;
+				}
+
+				if (valid) {
+					result.append((char) code);
+					i += 6;
+					continue;
+				}
+			}
+
+			result.append(input.charAt(i++));
+		}
+
+		return result.toString();
 	}
 
 	private static String prettifyJson(String json) {
@@ -30,20 +56,21 @@ public class Ununicode {
     public static byte[] getUnescapedRawContent(byte[] content) throws IOException {
         String prettified = prettifyJson(new String(content));
 
-        String unescaped = new UnicodeUnescaper().translate(prettified);
+        String unescaped = unescape(prettified);
 		
         return unescaped.getBytes();
     }
 
+	// we decode HTTP-headers and body separetely because we want prettify body if can
+	// without relying on content-type
     public static byte[] getUnescapedHttpContent(byte[] content, int bodyOffset) throws IOException {
 		byte[] headers = Arrays.copyOfRange(content, 0, bodyOffset);
 		byte[] body = Arrays.copyOfRange(content, bodyOffset, content.length);
 
-        String prettified = prettifyJson(new String(body));
+		String unescapedHeaders = unescape(new String(headers));
+        String unescapedBody = unescape(prettifyJson(new String(body)));
 
-        String unescaped = new UnicodeUnescaper().translate(prettified);
-
-        byte[] out = concatHttp(headers, unescaped.getBytes());
+        byte[] out = (unescapedHeaders + unescapedBody).getBytes();
 
         return out;
     }
